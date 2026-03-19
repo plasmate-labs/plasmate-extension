@@ -32,13 +32,62 @@ This extension makes that handoff instant.
 1. Navigate to a site and log in normally
 2. Click the Plasmate icon in the toolbar
 3. Auth cookies are pre-selected for known sites
-4. Click **Copy CLI** to get a ready-to-paste command:
+4. Click **Push to Plasmate** (or copy to clipboard as fallback)
 
+## Bridge Mode (Recommended)
+
+The fastest way: run the Plasmate bridge server and cookies get pushed directly with one click. No copy-paste needed.
+
+```bash
+# Start the bridge server (runs on 127.0.0.1:9271)
+plasmate auth serve
+```
+
+When the bridge is running, the extension shows a green dot with the version number. Click **Push to Plasmate** and cookies are stored instantly with AES-256-GCM encryption.
+
+When the bridge is offline, the extension shows "Bridge offline" and falls back to copying a CLI command to your clipboard.
+
+### Cookie expiry tracking
+
+The extension sends each cookie's `expirationDate` from Chrome's cookie API. Plasmate tracks expiry so you get warnings when cookies are about to expire:
+
+```bash
+# Check cookie status
+plasmate auth list
+# ✓ x.com (2 cookies) - valid
+# ⚠ github.com (2 cookies) - expires soon
+
+plasmate auth info x.com
+# Domain:    x.com
+# Cookies:   2
+# Encrypted: yes
+#   ct0 - ✓ valid (expires in 14 days)
+#   auth_token - ✓ valid (expires in 30 days)
+```
+
+## Manual Mode (No Bridge)
+
+If you prefer not to run the bridge, the extension copies CLI commands to your clipboard:
+
+**Copy CLI:**
 ```bash
 plasmate auth set x.com --cookies "ct0=abc123; auth_token=xyz789"
 ```
 
-5. Paste into terminal. Your agent can now browse that site authenticated.
+**Copy JSON:**
+```json
+{
+  "domain": "x.com",
+  "cookies": {
+    "ct0": "abc123",
+    "auth_token": "xyz789"
+  },
+  "expiry": {
+    "ct0": 1742500000,
+    "auth_token": 1745000000
+  }
+}
+```
 
 ## Install
 
@@ -63,31 +112,14 @@ Pre-configured cookie recommendations for popular platforms:
 
 Every site works. These just get auto-selected for convenience.
 
-## Output Formats
-
-**CLI** (recommended):
-```bash
-plasmate auth set x.com --cookies "ct0=abc123; auth_token=xyz789"
-```
-
-**JSON** (programmatic):
-```json
-{
-  "domain": "x.com",
-  "cookies": {
-    "ct0": "abc123",
-    "auth_token": "xyz789"
-  }
-}
-```
-
 ## Privacy & Security
 
-- **Permissions**: `cookies` + `activeTab` only
-- **No network access**: the extension never phones home
-- **No storage**: nothing persisted, clipboard only
+- **Permissions**: `cookies`, `activeTab`, `host_permissions` (needed for cross-domain cookie access in MV3)
+- **Local only**: the extension only communicates with `127.0.0.1:9271` (the local Plasmate bridge). It never contacts any external server.
+- **No storage**: nothing persisted in the extension itself
 - **No analytics**: no tracking, no telemetry
-- **Open source**: read every line, it's ~80 lines of JS
+- **Encrypted at rest**: cookies pushed via the bridge are encrypted with AES-256-GCM before being written to disk
+- **Open source**: read every line, it's ~200 lines of JS
 
 ## Related
 
