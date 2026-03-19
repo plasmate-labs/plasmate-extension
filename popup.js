@@ -9,10 +9,17 @@ const PRESETS = {
   'instagram.com': ['sessionid', 'csrftoken'],
 };
 
+// Bridge server config
+const BRIDGE_URL = 'http://127.0.0.1:9271';
+
 let allCookies = [];
 let currentDomain = '';
+let bridgeAvailable = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Check if bridge server is running
+  checkBridgeStatus();
+
   // Get the active tab's URL
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.url) {
@@ -55,6 +62,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupButtons();
 });
 
+async function checkBridgeStatus() {
+  try {
+    const resp = await fetch(`${BRIDGE_URL}/api/status`, { method: 'GET' });
+    if (resp.ok) {
+      bridgeAvailable = true;
+      const data = await resp.json();
+      updateBridgeStatus(true, data.version);
+    } else {
+      updateBridgeStatus(false);
+    }
+  } catch (e) {
+    updateBridgeStatus(false);
+  }
+}
+
+function updateBridgeStatus(available, version) {
+  const statusEl = document.getElementById('bridge-status');
+  if (available) {
+    statusEl.innerHTML = `<span class="status-dot online"></span>Bridge v${version}`;
+    statusEl.title = 'Plasmate bridge server is running';
+  } else {
+    statusEl.innerHTML = `<span class="status-dot offline"></span>Bridge offline`;
+    statusEl.title = 'Start with: plasmate auth serve';
+  }
+}
+
 function getRecommended() {
   for (const [domain, cookies] of Object.entries(PRESETS)) {
     if (currentDomain === domain || currentDomain.endsWith('.' + domain)) {
@@ -96,24 +129,74 @@ function getSelected() {
 }
 
 function setupButtons() {
-  document.getElementById('copy-cli').addEventListener('click', () => {
+  // Push to Plasmate (primary action)
+  document.getElementById('push-plasmate').addEventListener('click', async () => {
+    const selected = getSelected();
+    if (selected.length === 0) return;
+
+    // Build request with cookies and expiry info from Chrome API
+    const cookies = {};
+    const expiry = {};
+    for (const c of selected) {
+      cookies[c.name] = c.value;
+      if (c.expirationDate) {
+        expiry[c.name] = Math.floor(c.expirationDate);
+      }
+    }
+
+    const payload = { domain: currentDomain, cookies, expiry };
+
+    if (bridgeAvailable) {
+      // Try to push directly to bridge
+      try {
+        const resp = await fetch(`${BRIDGE_URL}/api/cookies`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          showMessage(`Pushed ${data.cookies_stored} cookies to Plasmate`);
+          return;
+        }
+      } catch (e) {
+        // Fall through to clipboard
+      }
+    }
+
+    // Fallback: copy CLI command to clipboard
+    const cookieStr = selected.map(c => `${c.name}=${c.value}`).join('; ');
+    const cmd = `plasmate auth set ${currentDomain} --cookies "${cookieStr}"`;
+    await navigator.clipboard.writeText(cmd);
+    showMessage('Copied CLI command (bridge offline)');
+  });
+
+  document.getElementById('copy-cli').addEventListener('click', async () => {
     const selected = getSelected();
     if (selected.length === 0) return;
 
     const cookieStr = selected.map(c => `${c.name}=${c.value}`).join('; ');
     const cmd = `plasmate auth set ${currentDomain} --cookies "${cookieStr}"`;
-    copyAndFlash(cmd);
+    await navigator.clipboard.writeText(cmd);
+    showMessage('Copied!');
   });
 
-  document.getElementById('copy-json').addEventListener('click', () => {
+  document.getElementById('copy-json').addEventListener('click', async () => {
     const selected = getSelected();
     if (selected.length === 0) return;
 
-    const obj = { domain: currentDomain, cookies: {} };
+    const cookies = {};
+    const expiry = {};
     for (const c of selected) {
-      obj.cookies[c.name] = c.value;
+      cookies[c.name] = c.value;
+      if (c.expirationDate) {
+        expiry[c.name] = Math.floor(c.expirationDate);
+      }
     }
-    copyAndFlash(JSON.stringify(obj, null, 2));
+    const obj = { domain: currentDomain, cookies, expiry };
+    await navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
+    showMessage('Copied!');
   });
 
   document.getElementById('select-all').addEventListener('click', () => {
@@ -126,13 +209,14 @@ function setupButtons() {
 }
 
 function disableButtons() {
+  document.getElementById('push-plasmate').disabled = true;
   document.getElementById('copy-cli').disabled = true;
   document.getElementById('copy-json').disabled = true;
 }
 
-function copyAndFlash(text) {
-  navigator.clipboard.writeText(text);
+function showMessage(text) {
   const el = document.getElementById('copied');
+  el.textContent = text;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 1500);
 }

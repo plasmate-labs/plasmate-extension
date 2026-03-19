@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Plasmate Cookie Export",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Export auth cookies for Plasmate browser engine. One click, no dev tools.",
   "permissions": ["cookies", "activeTab"],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

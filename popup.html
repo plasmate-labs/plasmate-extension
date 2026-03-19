@@ -7,7 +7,11 @@
     body { width: 360px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a0a; color: #e5e5e5; font-size: 13px; }
     .header { padding: 12px 16px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 8px; }
     .header svg { width: 20px; height: 20px; }
-    .header h1 { font-size: 14px; font-weight: 600; }
+    .header h1 { font-size: 14px; font-weight: 600; flex: 1; }
+    .bridge-status { font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .status-dot.online { background: #22c55e; }
+    .status-dot.offline { background: #666; }
     .domain { padding: 8px 16px; background: #111; border-bottom: 1px solid #222; font-size: 12px; color: #888; }
     .domain span { color: #e5e5e5; font-weight: 500; }
     .cookies { max-height: 280px; overflow-y: auto; }
@@ -19,8 +23,11 @@
     .cookie.recommended { background: #0f0d1a; }
     .cookie.recommended .cookie-name { color: #a78bfa; }
     .tag { font-size: 9px; background: #2d2250; color: #a78bfa; padding: 1px 5px; border-radius: 3px; margin-left: 4px; }
-    .actions { padding: 12px 16px; display: flex; gap: 8px; border-top: 1px solid #222; }
+    .actions { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #222; }
+    .actions-row { display: flex; gap: 8px; }
     .btn { flex: 1; padding: 8px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .btn-push { background: #22c55e; color: #0a0a0a; }
+    .btn-push:hover { background: #16a34a; }
     .btn-primary { background: #7c6ef0; color: white; }
     .btn-primary:hover { background: #6b5ce0; }
     .btn-secondary { background: #222; color: #ccc; }
@@ -41,6 +48,9 @@
       <path d="M8 12l3 3 5-5"/>
     </svg>
     <h1>Plasmate</h1>
+    <div class="bridge-status" id="bridge-status">
+      <span class="status-dot offline"></span>Checking...
+    </div>
   </div>
   <div class="domain">Cookies for <span id="domain">loading...</span></div>
   <div class="select-controls">
@@ -49,8 +59,11 @@
   </div>
   <div class="cookies" id="cookies"></div>
   <div class="actions">
-    <button class="btn btn-primary" id="copy-cli">Copy CLI</button>
-    <button class="btn btn-secondary" id="copy-json">Copy JSON</button>
+    <button class="btn btn-push" id="push-plasmate">Push to Plasmate</button>
+    <div class="actions-row">
+      <button class="btn btn-secondary" id="copy-cli">Copy CLI</button>
+      <button class="btn btn-secondary" id="copy-json">Copy JSON</button>
+    </div>
   </div>
   <div class="copied" id="copied">Copied!</div>
   <script src="popup.js"></script>
