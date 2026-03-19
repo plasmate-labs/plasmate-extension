@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 360px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a0a; color: #e5e5e5; font-size: 13px; }
+    .header { padding: 12px 16px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 8px; }
+    .header svg { width: 20px; height: 20px; }
+    .header h1 { font-size: 14px; font-weight: 600; }
+    .domain { padding: 8px 16px; background: #111; border-bottom: 1px solid #222; font-size: 12px; color: #888; }
+    .domain span { color: #e5e5e5; font-weight: 500; }
+    .cookies { max-height: 280px; overflow-y: auto; }
+    .cookie { padding: 8px 16px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .cookie:hover { background: #151515; }
+    .cookie input[type="checkbox"] { accent-color: #7c6ef0; }
+    .cookie-name { font-weight: 500; font-size: 12px; min-width: 100px; }
+    .cookie-value { font-size: 11px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-family: "SF Mono", Monaco, monospace; }
+    .cookie.recommended { background: #0f0d1a; }
+    .cookie.recommended .cookie-name { color: #a78bfa; }
+    .tag { font-size: 9px; background: #2d2250; color: #a78bfa; padding: 1px 5px; border-radius: 3px; margin-left: 4px; }
+    .actions { padding: 12px 16px; display: flex; gap: 8px; border-top: 1px solid #222; }
+    .btn { flex: 1; padding: 8px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .btn-primary { background: #7c6ef0; color: white; }
+    .btn-primary:hover { background: #6b5ce0; }
+    .btn-secondary { background: #222; color: #ccc; }
+    .btn-secondary:hover { background: #2a2a2a; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .empty { padding: 32px 16px; text-align: center; color: #666; }
+    .copied { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: #a78bfa; padding: 6px 16px; border-radius: 6px; font-size: 12px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    .copied.show { opacity: 1; }
+    .select-controls { padding: 4px 16px; display: flex; gap: 12px; font-size: 11px; }
+    .select-controls a { color: #7c6ef0; cursor: pointer; text-decoration: none; }
+    .select-controls a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#7c6ef0" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M8 12l3 3 5-5"/>
+    </svg>
+    <h1>Plasmate</h1>
+  </div>
+  <div class="domain">Cookies for <span id="domain">loading...</span></div>
+  <div class="select-controls">
+    <a id="select-all">Select all</a>
+    <a id="select-none">Select none</a>
+  </div>
+  <div class="cookies" id="cookies"></div>
+  <div class="actions">
+    <button class="btn btn-primary" id="copy-cli">Copy CLI</button>
+    <button class="btn btn-secondary" id="copy-json">Copy JSON</button>
+  </div>
+  <div class="copied" id="copied">Copied!</div>
+  <script src="popup.js"></script>
+</body>
+</html>
