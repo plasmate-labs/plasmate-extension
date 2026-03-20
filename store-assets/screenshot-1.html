@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1280px; height: 800px; background: #111110; font-family: 'IBM Plex Sans', sans-serif; overflow: hidden; position: relative; }
+  
+  /* Caption bar */
+  .caption {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 56px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, rgba(232,133,58,0.12) 0%, rgba(17,17,16,0) 100%);
+    z-index: 10;
+  }
+  .caption h2 {
+    font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600;
+    color: #F0EDE8; letter-spacing: -0.02em;
+  }
+  .caption h2 span { color: #E8853A; }
+
+  /* Browser chrome */
+  .browser {
+    position: absolute; top: 80px; left: 120px; right: 120px; bottom: 40px;
+    background: #1a1a1a; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  .browser-bar {
+    height: 44px; background: #252525; display: flex; align-items: center; padding: 0 16px; gap: 8px;
+    border-bottom: 1px solid #333;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+  .url-bar {
+    flex: 1; margin-left: 12px; height: 28px; background: #1a1a1a; border-radius: 6px;
+    display: flex; align-items: center; padding: 0 12px;
+    font-size: 13px; color: #888; font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .url-bar .lock { color: #22c55e; margin-right: 6px; font-size: 11px; }
+  .url-bar .domain-text { color: #ccc; }
+
+  /* Page content (x.com mockup) */
+  .page-content {
+    display: flex; height: calc(100% - 44px);
+  }
+  .sidebar {
+    width: 68px; background: #0f0f0f; border-right: 1px solid #2a2a2a;
+    display: flex; flex-direction: column; align-items: center; padding-top: 16px; gap: 24px;
+  }
+  .sidebar-icon {
+    width: 28px; height: 28px; border-radius: 50%; background: #222;
+  }
+  .main-feed {
+    flex: 1; background: #000; border-right: 1px solid #2a2a2a; position: relative;
+  }
+  .feed-header {
+    padding: 16px; border-bottom: 1px solid #2a2a2a; font-size: 20px; font-weight: 700; color: #e5e5e5;
+  }
+  .tweet {
+    padding: 16px; border-bottom: 1px solid #2a2a2a; display: flex; gap: 12px;
+  }
+  .tweet-avatar { width: 40px; height: 40px; border-radius: 50%; background: #333; flex-shrink: 0; }
+  .tweet-body { flex: 1; }
+  .tweet-name { font-size: 14px; font-weight: 600; color: #e5e5e5; }
+  .tweet-handle { font-size: 14px; color: #666; margin-left: 4px; }
+  .tweet-text { font-size: 14px; color: #ccc; margin-top: 4px; line-height: 1.4; }
+  .right-panel {
+    width: 280px; background: #000; padding: 16px;
+  }
+  .search-box {
+    height: 36px; background: #1a1a1a; border-radius: 18px; padding: 0 16px;
+    display: flex; align-items: center; color: #666; font-size: 14px;
+  }
+
+  /* Extension popup overlay */
+  .popup-overlay {
+    position: absolute; top: 44px; right: 8px; z-index: 20;
+  }
+  .popup {
+    width: 360px; background: #0a0a0a; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px; color: #e5e5e5;
+  }
+  .popup-header {
+    padding: 12px 16px; border-bottom: 1px solid #222;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .popup-header svg { width: 20px; height: 20px; }
+  .popup-header h1 { font-size: 14px; font-weight: 600; flex: 1; }
+  .bridge-status { font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #22c55e; }
+  .popup-domain { padding: 8px 16px; background: #111; border-bottom: 1px solid #222; font-size: 12px; color: #888; }
+  .popup-domain span { color: #e5e5e5; font-weight: 500; }
+  .select-controls { padding: 4px 16px; display: flex; gap: 12px; font-size: 11px; }
+  .select-controls a { color: #7c6ef0; cursor: pointer; text-decoration: none; }
+  .cookie-list { max-height: 240px; overflow: hidden; }
+  .cookie-item {
+    padding: 8px 16px; border-bottom: 1px solid #1a1a1a;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cookie-item.recommended { background: #0f0d1a; }
+  .cookie-item input[type="checkbox"] { accent-color: #7c6ef0; width: 14px; height: 14px; }
+  .cookie-name { font-weight: 500; font-size: 12px; min-width: 100px; }
+  .cookie-item.recommended .cookie-name { color: #a78bfa; }
+  .cookie-value { font-size: 11px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-family: "SF Mono", Monaco, monospace; }
+  .tag { font-size: 9px; background: #2d2250; color: #a78bfa; padding: 1px 5px; border-radius: 3px; margin-left: 4px; }
+  .popup-actions { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #222; }
+  .popup-actions-row { display: flex; gap: 8px; }
+  .btn { flex: 1; padding: 8px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; text-align: center; }
+  .btn-push { background: #22c55e; color: #0a0a0a; }
+  .btn-secondary { background: #222; color: #ccc; }
+
+  /* Glow effect behind popup */
+  .popup-glow {
+    position: absolute; top: 44px; right: 8px; width: 360px; height: 400px;
+    background: radial-gradient(ellipse at center, rgba(124,110,240,0.08) 0%, transparent 70%);
+    z-index: 19; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="caption"><h2>One-click cookie export for <span>X/Twitter</span></h2></div>
+
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="url-bar">
+        <span class="lock">&#128274;</span>
+        <span class="domain-text">x.com</span>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="sidebar">
+        <div class="sidebar-icon"></div>
+        <div class="sidebar-icon"></div>
+        <div class="sidebar-icon"></div>
+        <div class="sidebar-icon"></div>
+        <div class="sidebar-icon"></div>
+      </div>
+      <div class="main-feed">
+        <div class="feed-header">Home</div>
+        <div class="tweet">
+          <div class="tweet-avatar"></div>
+          <div class="tweet-body">
+            <span class="tweet-name">Developer</span><span class="tweet-handle">@dev_tools</span>
+            <div class="tweet-text">Just shipped a new feature using AI agents with real browser auth. The future of automation is here.</div>
+          </div>
+        </div>
+        <div class="tweet">
+          <div class="tweet-avatar" style="background:#2a2a2a"></div>
+          <div class="tweet-body">
+            <span class="tweet-name">Plasmate</span><span class="tweet-handle">@plasmate_dev</span>
+            <div class="tweet-text">Give your AI agent real logins - no more mock sessions or expired tokens.</div>
+          </div>
+        </div>
+
+        <!-- Popup overlay -->
+        <div class="popup-glow"></div>
+        <div class="popup-overlay">
+          <div class="popup">
+            <div class="popup-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#7c6ef0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+              <h1>Plasmate</h1>
+              <div class="bridge-status"><span class="status-dot"></span> Connected</div>
+            </div>
+            <div class="popup-domain">Cookies for <span>x.com</span></div>
+            <div class="select-controls"><a>Select all</a> <a>Select none</a></div>
+            <div class="cookie-list">
+              <div class="cookie-item recommended">
+                <input type="checkbox" checked>
+                <span class="cookie-name">auth_token</span><span class="tag">auth</span>
+                <span class="cookie-value">a1b2c3d4e5f6...</span>
+              </div>
+              <div class="cookie-item recommended">
+                <input type="checkbox" checked>
+                <span class="cookie-name">ct0</span><span class="tag">auth</span>
+                <span class="cookie-value">f8e7d6c5b4a3...</span>
+              </div>
+              <div class="cookie-item">
+                <input type="checkbox">
+                <span class="cookie-name">guest_id</span>
+                <span class="cookie-value">v1%3A17098...</span>
+              </div>
+              <div class="cookie-item">
+                <input type="checkbox">
+                <span class="cookie-name">twid</span>
+                <span class="cookie-value">u%3D12345...</span>
+              </div>
+              <div class="cookie-item">
+                <input type="checkbox">
+                <span class="cookie-name">personalization_id</span>
+                <span class="cookie-value">v1_abc123...</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <div class="btn btn-push">Push to Plasmate</div>
+              <div class="popup-actions-row">
+                <div class="btn btn-secondary">Copy CLI</div>
+                <div class="btn btn-secondary">Copy JSON</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="search-box">&#128269; Search</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

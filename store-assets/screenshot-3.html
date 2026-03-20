@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1280px; height: 800px; background: #111110; font-family: 'IBM Plex Sans', sans-serif; overflow: hidden; position: relative; }
+
+  .caption {
+    position: absolute; top: 0; left: 0; right: 0; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, rgba(232,133,58,0.12) 0%, rgba(17,17,16,0) 100%);
+    z-index: 10;
+  }
+  .caption h2 {
+    font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600;
+    color: #F0EDE8; letter-spacing: -0.02em;
+  }
+  .caption h2 span { color: #E8853A; }
+
+  .terminal {
+    position: absolute; top: 80px; left: 160px; right: 160px; bottom: 60px;
+    background: #0a0a0a; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
+  }
+  .terminal-bar {
+    height: 40px; background: #1a1a1a; display: flex; align-items: center; padding: 0 16px; gap: 8px;
+    border-bottom: 1px solid #333;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+  .terminal-title {
+    flex: 1; text-align: center; font-size: 12px; color: #888;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .terminal-body {
+    padding: 20px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 1.7;
+  }
+  .prompt { color: #E8853A; }
+  .cmd { color: #F0EDE8; }
+  .dim { color: #666; }
+  .green { color: #22c55e; }
+  .yellow { color: #eab308; }
+  .red { color: #ef4444; }
+  .blue { color: #3D8FD4; }
+  .purple { color: #a78bfa; }
+  .gold { color: #D4C5A0; }
+  .white { color: #F0EDE8; }
+  .header-line { color: #E8853A; font-weight: 600; }
+  .separator { color: #333; }
+  .domain-col { display: inline-block; min-width: 240px; }
+  .status-col { display: inline-block; min-width: 100px; }
+  .expires-col { display: inline-block; min-width: 180px; }
+  .cookies-col { display: inline-block; }
+</style>
+</head>
+<body>
+  <div class="caption"><h2>Encrypted storage with <span>expiry tracking</span></h2></div>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="terminal-title">Terminal - plasmate</div>
+    </div>
+    <div class="terminal-body">
+      <div><span class="prompt">$</span> <span class="cmd">plasmate auth list</span></div>
+      <br>
+      <div><span class="header-line">  Authenticated Domains</span></div>
+      <div><span class="separator">  -------------------------------------------------------</span></div>
+      <br>
+      <div>
+        <span class="domain-col"><span class="white">  x.com</span></span>
+        <span class="status-col"><span class="green">&#10003; active</span></span>
+        <span class="expires-col"><span class="dim">expires 2026-04-18</span></span>
+        <span class="cookies-col"><span class="purple">2 cookies</span></span>
+      </div>
+      <div>
+        <span class="domain-col"><span class="white">  github.com</span></span>
+        <span class="status-col"><span class="green">&#10003; active</span></span>
+        <span class="expires-col"><span class="dim">expires 2026-05-02</span></span>
+        <span class="cookies-col"><span class="purple">4 cookies</span></span>
+      </div>
+      <div>
+        <span class="domain-col"><span class="white">  linkedin.com</span></span>
+        <span class="status-col"><span class="green">&#10003; active</span></span>
+        <span class="expires-col"><span class="dim">expires 2026-04-25</span></span>
+        <span class="cookies-col"><span class="purple">3 cookies</span></span>
+      </div>
+      <div>
+        <span class="domain-col"><span class="white">  reddit.com</span></span>
+        <span class="status-col"><span class="yellow">&#9888; expiring</span></span>
+        <span class="expires-col"><span class="yellow">expires 2026-03-21</span></span>
+        <span class="cookies-col"><span class="purple">2 cookies</span></span>
+      </div>
+      <div>
+        <span class="domain-col"><span class="white">  discord.com</span></span>
+        <span class="status-col"><span class="green">&#10003; active</span></span>
+        <span class="expires-col"><span class="dim">expires 2026-06-10</span></span>
+        <span class="cookies-col"><span class="purple">3 cookies</span></span>
+      </div>
+      <div>
+        <span class="domain-col"><span class="white">  notion.so</span></span>
+        <span class="status-col"><span class="red">&#10007; expired</span></span>
+        <span class="expires-col"><span class="red">expired 2026-03-15</span></span>
+        <span class="cookies-col"><span class="purple">2 cookies</span></span>
+      </div>
+      <br>
+      <div><span class="dim">  6 domains</span> <span class="separator">|</span> <span class="green">4 active</span> <span class="separator">|</span> <span class="yellow">1 expiring</span> <span class="separator">|</span> <span class="red">1 expired</span></div>
+      <div><span class="dim">  Storage: encrypted (AES-256-GCM)</span></div>
+      <br>
+      <div><span class="prompt">$</span> <span class="dim blink">_</span></div>
+    </div>
+  </div>
+</body>
+</html>

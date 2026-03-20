@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1280px; height: 800px; background: #111110; font-family: 'IBM Plex Sans', sans-serif; overflow: hidden; position: relative; }
+
+  .caption {
+    position: absolute; top: 0; left: 0; right: 0; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, rgba(232,133,58,0.12) 0%, rgba(17,17,16,0) 100%);
+    z-index: 10;
+  }
+  .caption h2 {
+    font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600;
+    color: #F0EDE8; letter-spacing: -0.02em;
+  }
+  .caption h2 span { color: #E8853A; }
+
+  .browser {
+    position: absolute; top: 80px; left: 120px; right: 120px; bottom: 40px;
+    background: #1a1a1a; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  .browser-bar {
+    height: 44px; background: #252525; display: flex; align-items: center; padding: 0 16px; gap: 8px;
+    border-bottom: 1px solid #333;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+  .url-bar {
+    flex: 1; margin-left: 12px; height: 28px; background: #1a1a1a; border-radius: 6px;
+    display: flex; align-items: center; padding: 0 12px; font-size: 13px; color: #888;
+  }
+  .url-bar .lock { color: #22c55e; margin-right: 6px; font-size: 11px; }
+  .url-bar .domain-text { color: #ccc; }
+
+  .page-content { display: flex; height: calc(100% - 44px); }
+  .gh-sidebar {
+    width: 240px; background: #0d1117; border-right: 1px solid #30363d; padding: 16px;
+  }
+  .gh-nav-item {
+    padding: 8px 12px; border-radius: 6px; font-size: 14px; color: #c9d1d9; margin-bottom: 2px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .gh-nav-item.active { background: #21262d; color: #f0f6fc; }
+  .gh-nav-icon { width: 16px; height: 16px; background: #484f58; border-radius: 3px; }
+  .gh-main {
+    flex: 1; background: #0d1117; position: relative;
+  }
+  .gh-header-bar {
+    padding: 16px 24px; border-bottom: 1px solid #30363d;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .gh-repo-icon { width: 16px; height: 16px; background: #484f58; border-radius: 3px; }
+  .gh-repo-name { font-size: 16px; color: #58a6ff; font-weight: 600; }
+  .gh-repo-sep { color: #484f58; }
+  .gh-tabs {
+    display: flex; gap: 0; border-bottom: 1px solid #30363d; padding: 0 24px;
+  }
+  .gh-tab {
+    padding: 12px 16px; font-size: 14px; color: #c9d1d9; border-bottom: 2px solid transparent;
+  }
+  .gh-tab.active { color: #f0f6fc; border-bottom-color: #f78166; }
+  .gh-content { padding: 24px; }
+  .gh-readme {
+    background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px;
+  }
+  .gh-readme h3 { font-size: 16px; color: #c9d1d9; margin-bottom: 8px; }
+  .gh-readme p { font-size: 14px; color: #8b949e; line-height: 1.5; }
+
+  /* Popup */
+  .popup-overlay { position: absolute; top: 44px; right: 8px; z-index: 20; }
+  .popup {
+    width: 360px; background: #0a0a0a; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px; color: #e5e5e5;
+  }
+  .popup-header {
+    padding: 12px 16px; border-bottom: 1px solid #222;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .popup-header svg { width: 20px; height: 20px; }
+  .popup-header h1 { font-size: 14px; font-weight: 600; flex: 1; }
+  .bridge-status { font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .popup-domain { padding: 8px 16px; background: #111; border-bottom: 1px solid #222; font-size: 12px; color: #888; }
+  .popup-domain span { color: #e5e5e5; font-weight: 500; }
+  .select-controls { padding: 4px 16px; display: flex; gap: 12px; font-size: 11px; }
+  .select-controls a { color: #7c6ef0; text-decoration: none; }
+  .cookie-list { max-height: 240px; overflow: hidden; }
+  .cookie-item {
+    padding: 8px 16px; border-bottom: 1px solid #1a1a1a;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cookie-item.recommended { background: #0f0d1a; }
+  .cookie-item input[type="checkbox"] { accent-color: #7c6ef0; width: 14px; height: 14px; }
+  .cookie-name { font-weight: 500; font-size: 12px; min-width: 100px; }
+  .cookie-item.recommended .cookie-name { color: #a78bfa; }
+  .cookie-value { font-size: 11px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-family: "SF Mono", Monaco, monospace; }
+  .tag { font-size: 9px; background: #2d2250; color: #a78bfa; padding: 1px 5px; border-radius: 3px; margin-left: 4px; }
+  .popup-actions { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #222; }
+  .popup-actions-row { display: flex; gap: 8px; }
+  .btn { flex: 1; padding: 8px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; text-align: center; }
+  .btn-push { background: #22c55e; color: #0a0a0a; }
+  .btn-secondary { background: #222; color: #ccc; }
+</style>
+</head>
+<body>
+  <div class="caption"><h2>Auto-selects auth cookies for <span>popular sites</span></h2></div>
+
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="url-bar">
+        <span class="lock">&#128274;</span>
+        <span class="domain-text">github.com/plasmate/plasmate</span>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="gh-sidebar">
+        <div class="gh-nav-item"><div class="gh-nav-icon"></div> Dashboard</div>
+        <div class="gh-nav-item"><div class="gh-nav-icon"></div> Pull requests</div>
+        <div class="gh-nav-item"><div class="gh-nav-icon"></div> Issues</div>
+        <div class="gh-nav-item"><div class="gh-nav-icon"></div> Codespaces</div>
+        <div class="gh-nav-item"><div class="gh-nav-icon"></div> Explore</div>
+      </div>
+      <div class="gh-main">
+        <div class="gh-header-bar">
+          <div class="gh-repo-icon"></div>
+          <span class="gh-repo-name">plasmate</span>
+          <span class="gh-repo-sep">/</span>
+          <span class="gh-repo-name">plasmate</span>
+        </div>
+        <div class="gh-tabs">
+          <div class="gh-tab active">Code</div>
+          <div class="gh-tab">Issues</div>
+          <div class="gh-tab">Pull requests</div>
+          <div class="gh-tab">Actions</div>
+        </div>
+        <div class="gh-content">
+          <div class="gh-readme">
+            <h3>README.md</h3>
+            <p>Plasmate - Auth cookies for your AI agent. Securely store and manage browser authentication for automated workflows.</p>
+          </div>
+        </div>
+
+        <div class="popup-overlay">
+          <div class="popup">
+            <div class="popup-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#7c6ef0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+              <h1>Plasmate</h1>
+              <div class="bridge-status"><span class="status-dot"></span> Connected</div>
+            </div>
+            <div class="popup-domain">Cookies for <span>github.com</span></div>
+            <div class="select-controls"><a>Select all</a> <a>Select none</a></div>
+            <div class="cookie-list">
+              <div class="cookie-item recommended">
+                <input type="checkbox" checked>
+                <span class="cookie-name">user_session</span><span class="tag">auth</span>
+                <span class="cookie-value">x9k2m4p8q1...</span>
+              </div>
+              <div class="cookie-item recommended">
+                <input type="checkbox" checked>
+                <span class="cookie-name">__Host-user_session_same_site</span><span class="tag">auth</span>
+                <span class="cookie-value">x9k2m4p8q1...</span>
+              </div>
+              <div class="cookie-item recommended">
+                <input type="checkbox" checked>
+                <span class="cookie-name">dotcom_user</span><span class="tag">auth</span>
+                <span class="cookie-value">devuser123</span>
+              </div>
+              <div class="cookie-item recommended">
+                <input type="checkbox" checked>
+                <span class="cookie-name">logged_in</span><span class="tag">auth</span>
+                <span class="cookie-value">yes</span>
+              </div>
+              <div class="cookie-item">
+                <input type="checkbox">
+                <span class="cookie-name">_gh_sess</span>
+                <span class="cookie-value">abc123def4...</span>
+              </div>
+              <div class="cookie-item">
+                <input type="checkbox">
+                <span class="cookie-name">color_mode</span>
+                <span class="cookie-value">dark</span>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <div class="btn btn-push">Push to Plasmate</div>
+              <div class="popup-actions-row">
+                <div class="btn btn-secondary">Copy CLI</div>
+                <div class="btn btn-secondary">Copy JSON</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
