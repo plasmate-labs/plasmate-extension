@@ -1,9 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Plasmate Cookie Export",
-  "version": "0.1.1",
-  "description": "Export auth cookies for Plasmate browser engine. One click, no dev tools.",
-  "permissions": ["cookies", "activeTab"],
+  "name": "Plasmate",
+  "version": "0.2.0",
+  "description": "Hand off browser tabs to your AI agent. Export cookies, capture context, and let Plasmate continue where you left off.",
+  "permissions": [
+    "cookies",
+    "activeTab",
+    "sidePanel",
+    "contextMenus",
+    "storage",
+    "tabs",
+    "scripting"
+  ],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",
@@ -17,5 +25,11 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
   }
 }

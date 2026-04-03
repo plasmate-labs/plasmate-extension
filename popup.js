@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if bridge server is running
   checkBridgeStatus();
 
+  // Setup handoff button
+  setupHandoffButton();
+
   // Get the active tab's URL
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.url) {
@@ -225,4 +228,110 @@ function esc(s) {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+
+// Setup handoff button in popup
+function setupHandoffButton() {
+  const handoffBtn = document.getElementById('handoff-page');
+  if (!handoffBtn) return;
+
+  handoffBtn.addEventListener('click', async () => {
+    // Try to open side panel first
+    try {
+      const result = await chrome.runtime.sendMessage({ type: 'OPEN_SIDE_PANEL' });
+      if (result && result.success) {
+        window.close(); // Close popup when side panel opens
+        return;
+      }
+    } catch (e) {
+      console.warn('Side panel not available:', e);
+    }
+
+    // Fallback: create quick handoff for current tab
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.url) {
+      showMessage('No page to hand off');
+      return;
+    }
+
+    handoffBtn.disabled = true;
+    handoffBtn.textContent = 'Sending...';
+
+    try {
+      // Build quick handoff payload
+      const payload = {
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+        mode: 'read',
+        tabs: [{
+          url: tab.url,
+          title: tab.title || '',
+          favIconUrl: tab.favIconUrl || ''
+        }],
+        instructions: '',
+        cookies: {},
+        context: { selectedText: '', scrollPosition: 0 },
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+      };
+
+      // Collect cookies for the page
+      const domain = new URL(tab.url).hostname.replace(/^www\./, '');
+      const cookies = await chrome.cookies.getAll({ domain });
+      const dotCookies = await chrome.cookies.getAll({ domain: '.' + domain });
+      const seen = new Set();
+      const domainCookies = {};
+
+      for (const c of [...cookies, ...dotCookies]) {
+        const key = c.name + '|' + c.domain;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        domainCookies[c.name] = {
+          value: c.value,
+          expiry: c.expirationDate ? Math.floor(c.expirationDate) : null
+        };
+      }
+      payload.cookies[domain] = domainCookies;
+
+      // Try to capture context
+      try {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => ({
+            selectedText: window.getSelection()?.toString() || '',
+            scrollPosition: window.scrollY || 0
+          })
+        });
+        if (results?.[0]?.result) {
+          payload.context = results[0].result;
+        }
+      } catch (e) {
+        // Ignore context capture errors
+      }
+
+      // Submit via background
+      const result = await chrome.runtime.sendMessage({ type: 'SUBMIT_HANDOFF', payload });
+
+      if (result && result.success) {
+        if (result.submitted) {
+          showMessage('Handoff sent to agent');
+        } else {
+          showMessage('Handoff saved locally');
+        }
+      } else {
+        showMessage('Handoff failed');
+      }
+    } catch (e) {
+      console.error('Handoff error:', e);
+      showMessage('Error creating handoff');
+    } finally {
+      handoffBtn.disabled = false;
+      handoffBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        Hand off this page
+      `;
+    }
+  });
 }

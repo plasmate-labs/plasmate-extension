@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Plasmate Handoff</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#7c6ef0" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M8 12l3 3 5-5"/>
+      </svg>
+      <h1>Handoff</h1>
+    </div>
+    <div class="bridge-status" id="bridge-status">
+      <span class="status-dot offline"></span>
+      <span class="status-text">Checking...</span>
+    </div>
+  </header>
+
+  <!-- Tab Picker -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Select Pages</h2>
+      <div class="select-controls">
+        <button class="link-btn" id="select-all">Select all</button>
+        <button class="link-btn" id="select-none">Select none</button>
+      </div>
+    </div>
+    <div class="tab-list" id="tab-list">
+      <div class="loading">Loading tabs...</div>
+    </div>
+  </section>
+
+  <!-- Instructions -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Instructions</h2>
+      <span class="char-count" id="char-count">0 / 2000</span>
+    </div>
+    <textarea 
+      class="instructions-input" 
+      id="instructions" 
+      placeholder="What should the agent do with these pages?"
+      maxlength="2000"
+    ></textarea>
+  </section>
+
+  <!-- Mode Selector -->
+  <section class="section">
+    <h2>Mode</h2>
+    <div class="mode-selector" id="mode-selector">
+      <label class="mode-option selected">
+        <input type="radio" name="mode" value="read" checked>
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+          </svg>
+        </div>
+        <div class="mode-text">
+          <span class="mode-title">Read</span>
+          <span class="mode-desc">Compile pages and send to agent</span>
+        </div>
+      </label>
+      <label class="mode-option">
+        <input type="radio" name="mode" value="watch">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div class="mode-text">
+          <span class="mode-title">Watch</span>
+          <span class="mode-desc">Monitor for changes and alert</span>
+        </div>
+      </label>
+      <label class="mode-option">
+        <input type="radio" name="mode" value="continue">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+        <div class="mode-text">
+          <span class="mode-title">Continue</span>
+          <span class="mode-desc">Agent picks up where you left off</span>
+        </div>
+      </label>
+    </div>
+  </section>
+
+  <!-- Handoff Button -->
+  <div class="action-section">
+    <button class="btn-primary" id="handoff-btn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 2L11 13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      Hand Off to Agent
+    </button>
+  </div>
+
+  <!-- History Section -->
+  <section class="section history-section">
+    <button class="history-toggle" id="history-toggle">
+      <h2>Recent Handoffs</h2>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+    <div class="history-list collapsed" id="history-list">
+      <div class="empty-history">No handoffs yet</div>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="lib/bridge.js"></script>
+  <script src="lib/handoff.js"></script>
+  <script src="lib/storage.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
